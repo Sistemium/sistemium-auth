@@ -1,0 +1,16 @@
+{
+  "name": "sistemium-auth",
+  "version": "1.0.0",
+  "description": "Sistemium AAA helpers",
+  "main": "lib/auth.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "Alexander Levin",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^0.21.0",
+    "sistemium-debug": "^1.0.1"
+  }
+}
