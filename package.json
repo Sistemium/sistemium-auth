@@ -9,6 +9,7 @@
   "keywords": [],
   "author": "Alexander Levin",
   "license": "ISC",
+  "repository": "Sistemium/sistemium-auth",
   "dependencies": {
     "axios": "^0.21.0",
     "sistemium-debug": "^1.0.1"
