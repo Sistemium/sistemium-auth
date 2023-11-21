@@ -2,7 +2,7 @@ import { roles as getRoles } from './auth';
 import log from 'sistemium-debug';
 // @ts-ignore
 import { setAsync, getAsync, client } from 'sistemium-redis';
-import { AuthCallback, TokenAuthConfig } from './types';
+import { AuthCallback, AuthResponse, TokenAuthConfig } from './types';
 
 const { debug, error } = log('auth');
 const AUTH_EXPIRE = parseInt(process.env.AUTH_EXPIRE || '300', 0);
@@ -47,7 +47,7 @@ export default function (config: TokenAuthConfig) {
 
 }
 
-async function cachedAuth(authorization: string, registerUser?: AuthCallback) {
+async function cachedAuth(authorization: string, registerUser?: AuthCallback): Promise<AuthResponse> {
 
   const cached = USE_REDIS && await getAsync(authorization);
 

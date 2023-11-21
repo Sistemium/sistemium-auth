@@ -10,7 +10,7 @@ export interface AuthResponse {
   roles: AuthRoles
 }
 
-export type AuthCallback = (auth: AuthResponse) => Promise<AuthResponse>
+export type AuthCallback = (auth: AuthResponse) => Promise<Record<string, any> & { roles: AuthRoles }>
 
 export interface TokenAuthConfig {
   requiredRole?: string,
