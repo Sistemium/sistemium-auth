@@ -1,6 +1,6 @@
 {
   "name": "sistemium-auth",
-  "version": "1.2.3",
+  "version": "1.2.4",
   "description": "Sistemium AAA helpers",
   "main": "lib",
   "files": [
