@@ -1,6 +1,5 @@
 import { roles as getRoles } from './auth';
 import log from 'sistemium-debug';
-// @ts-ignore
 import { setAsync, getAsync, client } from 'sistemium-redis';
 import { AuthCallback, AuthResponse, TokenAuthConfig } from './types';
 
