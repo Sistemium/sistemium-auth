@@ -2,7 +2,7 @@
   "name": "sistemium-auth",
   "version": "1.2.3",
   "description": "Sistemium AAA helpers",
-  "main": "lib/auth",
+  "main": "lib",
   "files": [
     "lib"
   ],
