@@ -1,3 +1,3 @@
 export * from './types';
-export * from './tokenAuth';
+export { default as tokenAuth } from './tokenAuth';
 export * as auth from './auth';
