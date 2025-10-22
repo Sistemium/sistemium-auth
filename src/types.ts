@@ -12,7 +12,12 @@ export interface AuthResponse {
 
 export type AuthCallback = (auth: AuthResponse) => Promise<Record<string, any> & { roles: AuthRoles }>
 
+export interface AuthConfig {
+  rolesUrl?: string
+  authUrl?: string
+}
+
 export interface TokenAuthConfig {
-  requiredRole?: string,
+  requiredRole?: string
   registerUser?: AuthCallback
 }

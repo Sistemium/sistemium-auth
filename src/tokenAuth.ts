@@ -1,4 +1,4 @@
-import { roles as getRoles } from './auth';
+import Auth from './auth';
 import log from 'sistemium-debug';
 import { setAsync, getAsync, client } from 'sistemium-redis';
 import { AuthCallback, AuthResponse, TokenAuthConfig } from './types';
@@ -8,7 +8,7 @@ const AUTH_EXPIRE = parseInt(process.env.AUTH_EXPIRE || '300', 0);
 const USE_REDIS = AUTH_EXPIRE > 0 && client;
 
 
-export default function (config: TokenAuthConfig) {
+export default function (auth: Auth, config: TokenAuthConfig = {}) {
 
   const {
     requiredRole,
@@ -23,7 +23,7 @@ export default function (config: TokenAuthConfig) {
 
     try {
 
-      const { account, roles } = await cachedAuth(authorization, registerUser);
+      const { account, roles } = await cachedAuth(auth, authorization, registerUser);
 
       if (requiredRole) {
         assert(roles[requiredRole], 403);
@@ -46,7 +46,7 @@ export default function (config: TokenAuthConfig) {
 
 }
 
-async function cachedAuth(authorization: string, registerUser?: AuthCallback): Promise<AuthResponse> {
+async function cachedAuth(auth: Auth, authorization: string, registerUser?: AuthCallback): Promise<AuthResponse> {
 
   const cached = USE_REDIS && await getAsync(authorization);
 
@@ -54,12 +54,12 @@ async function cachedAuth(authorization: string, registerUser?: AuthCallback): P
     return JSON.parse(cached);
   }
 
-  const auth = await getRoles(authorization);
-  const account = registerUser ? await registerUser(auth) : auth;
+  const authResponse = await auth.roles(authorization);
+  const account = registerUser ? await registerUser(authResponse) : authResponse;
   const res = {
-    ...auth,
+    ...authResponse,
     roles: {
-      ...(auth.roles || {}),
+      ...(authResponse.roles || {}),
       ...(account.roles || {}),
     },
   };

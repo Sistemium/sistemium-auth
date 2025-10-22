@@ -1,10 +1,10 @@
-import { roles as getRoles } from './auth';
+import Auth from './auth';
 import log from 'sistemium-debug';
 import { TokenAuthConfig } from './types';
 
 const { debug, error } = log('auth');
 
-export default function (config: TokenAuthConfig) {
+export default function (auth: Auth, config: TokenAuthConfig = {}) {
 
   const { requiredRole } = config;
 
@@ -15,7 +15,7 @@ export default function (config: TokenAuthConfig) {
 
     try {
 
-      const { account, roles } = await getRoles(authorization);
+      const { account, roles } = await auth.roles(authorization);
 
       if (requiredRole) {
         assert(roles[requiredRole], 403);
@@ -32,5 +32,5 @@ export default function (config: TokenAuthConfig) {
 
     await next();
 
-  }
+  };
 }
