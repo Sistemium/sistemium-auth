@@ -1,0 +1,19 @@
+{
+  // Compiles consumers.ts against the built lib/*.d.ts, the way dependent projects see the package.
+  // Run after the build: tsc -p test-types
+  "compilerOptions": {
+    "target": "es2020",
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "noEmit": true,
+    "baseUrl": ".",
+    "paths": {
+      "sistemium-auth": ["../lib"],
+      "sistemium-auth/*": ["../*"]
+    }
+  },
+  "files": ["consumers.ts"]
+}
