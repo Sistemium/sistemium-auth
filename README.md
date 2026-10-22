@@ -78,7 +78,7 @@ const middleware = tokenAuth(auth, {
 });
 ```
 
-Redis caching is controlled by `AUTH_EXPIRE` environment variable (default: 300 seconds).
+Redis caching is controlled by `AUTH_EXPIRE` environment variable (default: 300 seconds). `sistemium-redis` connects to Redis when it is loaded (`REDIS_HOST`, `REDIS_PORT`); with `REDIS_AUTO_CONNECT=false` or `AUTH_EXPIRE=0` nothing is cached. If Redis is configured but unreachable, tokenAuth answers 401. Importing the package root loads tokenAuth and so `sistemium-redis`; `sistemium-auth/lib/middleware` does not.
 
 #### middleware (without caching)
 
@@ -96,22 +96,31 @@ Both middleware functions set the following on Koa context state:
 - `state.account` - User account information
 - `state.authId` - User auth ID (tokenAuth only)
 
-## Migration from v1.2.x
+## Compatibility with v1.2.x
 
-Version 1.3.0 introduces breaking changes for better flexibility and multiple instance support.
+Version 1.3.0 changed the middleware signature and removed the 1.2.x functions, which broke existing projects. Since 1.3.1 both APIs work:
 
-**Before (v1.2.x)**:
 ```typescript
-import { tokenAuth } from 'sistemium-auth';
-const mw = tokenAuth({ requiredRole: 'admin' });
+// 1.2.x: the default Auth (PHA_ROLES_URL or the Sistemium endpoint)
+import middleware from 'sistemium-auth/lib/middleware';
+import { roles } from 'sistemium-auth/lib/auth';
+import { tokenAuth, auth } from 'sistemium-auth';
+
+app.use(middleware({ requiredRole: 'admin' }));
+app.use(tokenAuth({ requiredRole: 'admin' }));
+const { account } = await roles(token);   // or auth.roles(token)
+
+// 1.3: an explicit Auth instance
+import { Auth, middleware, tokenAuth } from 'sistemium-auth';
+
+const pha = new Auth();
+app.use(middleware(pha, { requiredRole: 'admin' }));
+app.use(tokenAuth(pha, { requiredRole: 'admin' }));
 ```
 
-**After (v1.3.x)**:
-```typescript
-import { Auth, tokenAuth } from 'sistemium-auth';
-const auth = new Auth();
-const mw = tokenAuth(auth, { requiredRole: 'admin' });
-```
+`middleware` and `tokenAuth` take an auth client when their first argument has a `roles()` method, otherwise they treat it as the config. The 1.2.x functions read `PHA_ROLES_URL` / `PHA_AUTH_URL` on every call.
+
+A failed roles request (any HTTP error from the roles server, or no connection) always answers 401, a missing `requiredRole` answers 403.
 
 ## Multiple Instances
 
@@ -131,6 +140,7 @@ const testMw = tokenAuth(testAuth);
 - `PHA_ROLES_URL` - Default roles endpoint (fallback: `https://api.sistemium.com/pha/roles`)
 - `PHA_AUTH_URL` - Default auth endpoint (fallback: `https://api.sistemium.com/pha/auth`)
 - `AUTH_EXPIRE` - Redis cache TTL in seconds (default: 300)
+- `REDIS_AUTO_CONNECT=false` - do not connect to Redis (handled by `sistemium-redis`)
 
 ## TypeScript
 
@@ -149,15 +159,17 @@ import {
 ## Testing
 
 ```bash
-npm test              # Run tests
+npm test              # Build lib, check the consumer types (test-types/), run Jest
 npm run test:watch    # Run tests in watch mode
 ```
+
+The tests run against a local fake PHA server and need neither network nor Redis.
 
 ## Development
 
 ```bash
 npm run watch         # Build in watch mode
-npx tsc              # Build once
+npm run build         # Clean build of lib/
 ```
 
 ## License

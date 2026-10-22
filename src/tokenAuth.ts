@@ -1,14 +1,22 @@
-import Auth from './auth';
 import log from 'sistemium-debug';
 import { setAsync, getAsync, client } from 'sistemium-redis';
-import { AuthCallback, AuthResponse, TokenAuthConfig } from './types';
+import { fetchRoles, middlewareArgs } from './compat';
+import { AuthCallback, AuthMiddleware, AuthResponse, RolesProvider, TokenAuthConfig } from './types';
 
 const { debug, error } = log('auth');
 const AUTH_EXPIRE = parseInt(process.env.AUTH_EXPIRE || '300', 0);
 const USE_REDIS = AUTH_EXPIRE > 0 && client;
 
 
-export default function (auth: Auth, config: TokenAuthConfig = {}) {
+export default function tokenAuth(auth: RolesProvider, config?: TokenAuthConfig): AuthMiddleware;
+/** 1.2.x form: uses the default Auth (PHA_ROLES_URL or the Sistemium endpoint) */
+export default function tokenAuth(config?: TokenAuthConfig): AuthMiddleware;
+export default function tokenAuth(
+  authOrConfig?: RolesProvider | TokenAuthConfig,
+  maybeConfig?: TokenAuthConfig,
+): AuthMiddleware {
+
+  const [auth, config] = middlewareArgs(authOrConfig, maybeConfig);
 
   const {
     requiredRole,
@@ -46,7 +54,7 @@ export default function (auth: Auth, config: TokenAuthConfig = {}) {
 
 }
 
-async function cachedAuth(auth: Auth, authorization: string, registerUser?: AuthCallback): Promise<AuthResponse> {
+async function cachedAuth(auth: RolesProvider, authorization: string, registerUser?: AuthCallback): Promise<AuthResponse> {
 
   const cached = USE_REDIS && await getAsync(authorization);
 
@@ -54,7 +62,7 @@ async function cachedAuth(auth: Auth, authorization: string, registerUser?: Auth
     return JSON.parse(cached);
   }
 
-  const authResponse = await auth.roles(authorization);
+  const authResponse = await fetchRoles(auth, authorization);
   const account = registerUser ? await registerUser(authResponse) : authResponse;
   const res = {
     ...authResponse,

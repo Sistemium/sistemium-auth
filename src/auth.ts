@@ -44,3 +44,21 @@ export default class Auth {
   }
 
 }
+
+/*
+ * The 1.2.x API: plain functions using the default Auth configuration.
+ * Each call builds a default Auth, so PHA_ROLES_URL / PHA_AUTH_URL are read at call time
+ * (1.2.x read them once at module load; anything set before loading is still honoured).
+ */
+
+export async function roles(token: string): Promise<AuthResponse> {
+  return new Auth().roles(token);
+}
+
+export async function login(phone: string): Promise<string> {
+  return new Auth().login(phone);
+}
+
+export async function confirm(code: string, id: string): Promise<any> {
+  return new Auth().confirm(code, id);
+}

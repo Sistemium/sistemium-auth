@@ -21,3 +21,12 @@ export interface TokenAuthConfig {
   requiredRole?: string
   registerUser?: AuthCallback
 }
+
+/**
+ * What the middleware needs from an auth client: an Auth instance or anything with the same roles() method
+ */
+export interface RolesProvider {
+  roles(token: string): Promise<AuthResponse>
+}
+
+export type AuthMiddleware = (ctx: Record<string, any>, next: () => Promise<any>) => Promise<void>
